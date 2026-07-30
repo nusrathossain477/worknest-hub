@@ -6,6 +6,7 @@ import type { Task, TaskUpdate, TaskFeedback, Profile, TaskStatus, UpdateType } 
 import { ArrowLeft, Send, MessageSquare, HelpCircle, Star } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { TaskAttachments } from "@/components/TaskAttachments";
 
 export const Route = createFileRoute("/_authenticated/tasks/$taskId")({
   component: TaskDetail,
@@ -155,6 +156,14 @@ function TaskDetail() {
           </div>
         )}
       </div>
+
+      <TaskAttachments
+        taskId={task.id}
+        userId={user?.id}
+        canUpload={isAssignee && task.status !== "completed"}
+        isAdmin={isAdmin}
+        profilesMap={profilesMap}
+      />
 
       {/* Updates / requests */}
       <section className="rounded-2xl border bg-card p-6">
