@@ -100,6 +100,53 @@ export type Database = {
         }
         Relationships: []
       }
+      task_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          kind: Database["public"]["Enums"]["attachment_kind"]
+          link_url: string | null
+          mime_type: string | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["attachment_kind"]
+          link_url?: string | null
+          mime_type?: string | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["attachment_kind"]
+          link_url?: string | null
+          mime_type?: string | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_feedback: {
         Row: {
           admin_id: string
@@ -255,6 +302,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "employee" | "staff"
+      attachment_kind: "file" | "link"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status:
         | "pending"
@@ -391,6 +439,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "employee", "staff"],
+      attachment_kind: ["file", "link"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["pending", "in_progress", "submitted", "completed", "late"],
       update_type: ["progress", "request"],
