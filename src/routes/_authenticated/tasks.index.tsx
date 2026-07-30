@@ -7,7 +7,7 @@ import { TaskCard } from "@/components/TaskCard";
 import { AssignTaskDialog } from "@/components/AssignTaskDialog";
 import { Plus } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/tasks")({
+export const Route = createFileRoute("/_authenticated/tasks/")({
   component: TasksPage,
 });
 
