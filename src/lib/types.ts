@@ -43,6 +43,21 @@ export interface TaskFeedback {
   created_at: string;
 }
 
+export type AttachmentKind = "file" | "link";
+
+export interface TaskAttachment {
+  id: string;
+  task_id: string;
+  user_id: string;
+  kind: AttachmentKind;
+  file_name: string;
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  link_url: string | null;
+  created_at: string;
+}
+
 export interface NotificationItem {
   id: string;
   user_id: string;
