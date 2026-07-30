@@ -35,11 +35,13 @@ export function TaskAttachments({
   taskId,
   userId,
   canUpload,
+  isAdmin,
   profilesMap,
 }: {
   taskId: string;
   userId: string | undefined;
   canUpload: boolean;
+  isAdmin: boolean;
   profilesMap: Map<string, Profile>;
 }) {
   const [items, setItems] = useState<TaskAttachment[]>([]);
@@ -154,7 +156,7 @@ export function TaskAttachments({
         {items.length === 0 && <p className="text-sm text-muted-foreground">Nothing submitted yet.</p>}
         {items.map((a) => {
           const Icon = iconFor(a);
-          const canDelete = a.user_id === userId || canUploadAdminFallback();
+          const canDelete = a.user_id === userId || isAdmin;
           return (
             <div key={a.id} className="flex items-center gap-3 rounded-lg border p-3">
               <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -217,8 +219,4 @@ export function TaskAttachments({
       )}
     </section>
   );
-
-  function canUploadAdminFallback() {
-    return false;
-  }
 }
