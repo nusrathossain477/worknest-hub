@@ -38,7 +38,7 @@ function LoginPage() {
       <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-sm">
         <div className="mb-6 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <img src={logo.url} alt="WorkNest logo" className="h-9 w-9 rounded-lg object-cover" />
+            <img src={logo.url} alt="WorkNest logo" className="h-10 w-auto max-w-[48px] object-contain" />
             <span className="text-lg font-semibold">WorkNest</span>
           </Link>
           <h1 className="mt-4 text-2xl font-bold">Sign in</h1>
