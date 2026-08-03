@@ -3,6 +3,7 @@ import { LayoutDashboard, ListChecks, Users, Clock, LogOut, Bell } from "lucide-
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { NotificationsBell } from "./NotificationsBell";
+import logo from "@/assets/worknest-logo.png.asset.json";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, role, signOut } = useAuth();
@@ -28,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen w-full bg-background">
       <aside className="hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex items-center gap-2 px-6 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground font-bold">W</div>
+          <img src={logo.url} alt="WorkNest logo" className="h-9 w-9 rounded-lg object-cover" />
           <div>
             <div className="font-semibold leading-tight">WorkNest</div>
             <div className="text-xs capitalize text-sidebar-foreground/60">{role}</div>
@@ -64,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b bg-card px-6 py-3 md:px-8">
           <div className="flex items-center gap-2 md:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">W</div>
+            <img src={logo.url} alt="WorkNest logo" className="h-8 w-8 rounded-md object-cover" />
             <span className="font-semibold">WorkNest</span>
           </div>
           <div className="hidden md:block">

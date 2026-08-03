@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import logo from "@/assets/worknest-logo.png.asset.json";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -37,7 +38,7 @@ function LoginPage() {
       <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-sm">
         <div className="mb-6 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">W</div>
+            <img src={logo.url} alt="WorkNest logo" className="h-9 w-9 rounded-lg object-cover" />
             <span className="text-lg font-semibold">WorkNest</span>
           </Link>
           <h1 className="mt-4 text-2xl font-bold">Sign in</h1>
