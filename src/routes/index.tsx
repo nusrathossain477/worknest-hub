@@ -20,7 +20,7 @@ function Index() {
       <header className="border-b">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <img src={logo.url} alt="WorkNest logo" className="h-9 w-9 rounded-lg object-cover" />
+            <img src={logo.url} alt="WorkNest logo" className="h-10 w-auto max-w-[48px] object-contain" />
             <span className="text-lg font-semibold">WorkNest</span>
           </div>
           <div className="flex gap-2">
