@@ -2,6 +2,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Briefcase, Users, ClipboardList, ShieldCheck } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import logo from "@/assets/worknest-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -19,7 +20,7 @@ function Index() {
       <header className="border-b">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">W</div>
+            <img src={logo.url} alt="WorkNest logo" className="h-9 w-9 rounded-lg object-cover" />
             <span className="text-lg font-semibold">WorkNest</span>
           </div>
           <div className="flex gap-2">

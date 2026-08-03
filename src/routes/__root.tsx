@@ -61,7 +61,10 @@ export const Route = createRootRoute({
       { title: "WorkNest — Smart Company Management" },
       { name: "description", content: "Assign tasks, track attendance, and manage your team in one place." },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
