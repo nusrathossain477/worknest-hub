@@ -22,6 +22,53 @@ export function AssignTaskDialog({
     return d.toISOString().slice(0, 16);
   });
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
+  const [skillsBy, setSkillsBy] = useState<Record<string, string[]>>({});
+  const [openTasks, setOpenTasks] = useState<Record<string, number>>({});
+  const [overdue, setOverdue] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: ps }, { data: tk }] = await Promise.all([
+        supabase.from("profile_skills").select("user_id, proficiency, skill:skills(name)"),
+        supabase.from("tasks").select("assigned_to, status, due_date"),
+      ]);
+      const sk: Record<string, string[]> = {};
+      ((ps as any[]) ?? []).forEach((r) => {
+        const name = r.skill?.name;
+        if (!name) return;
+        (sk[r.user_id] ??= []).push(`${name} ${"★".repeat(r.proficiency)}`);
+      });
+      const open: Record<string, number> = {};
+      const late: Record<string, number> = {};
+      const now = Date.now();
+      ((tk as any[]) ?? []).forEach((t) => {
+        if (t.status === "completed") return;
+        open[t.assigned_to] = (open[t.assigned_to] ?? 0) + 1;
+        if (new Date(t.due_date).getTime() < now && t.status !== "submitted") {
+          late[t.assigned_to] = (late[t.assigned_to] ?? 0) + 1;
+        }
+      });
+      setSkillsBy(sk);
+      setOpenTasks(open);
+      setOverdue(late);
+    })();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return assignable;
+    return assignable.filter((m) => {
+      const hay = [
+        m.full_name, m.email, m.designation, m.department, m.role,
+        ...(skillsBy[m.id] ?? []),
+      ].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, members, skillsBy]);
+
+
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
