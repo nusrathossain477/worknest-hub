@@ -53,7 +53,37 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+
+        <div className="mt-4 space-y-2 border-t border-sidebar-border px-5 py-4 text-xs text-sidebar-foreground/70">
+          <div className="font-semibold uppercase tracking-wide text-sidebar-foreground/50">
+            {settings?.company_name || "WorkNest"} · Help &amp; Contact
+          </div>
+          {settings?.address && (
+            <div className="flex gap-2">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span className="leading-snug">{settings.address}</span>
+            </div>
+          )}
+          {settings?.helpline && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 shrink-0" />
+              <a href={`tel:${settings.helpline.replace(/\s/g, "")}`} className="hover:underline">
+                {settings.helpline}
+              </a>
+            </div>
+          )}
+          {settings?.support_email && (
+            <div className="flex items-center gap-2">
+              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <a href={`mailto:${settings.support_email}`} className="truncate hover:underline">
+                {settings.support_email}
+              </a>
+            </div>
+          )}
+        </div>
+
         <div className="border-t border-sidebar-border p-3">
+
           <div className="flex items-center gap-3 rounded-md px-3 py-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground text-sm font-semibold">{initials}</div>
             <div className="flex-1 overflow-hidden">
