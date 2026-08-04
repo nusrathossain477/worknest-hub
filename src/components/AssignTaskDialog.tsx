@@ -123,14 +123,50 @@ export function AssignTaskDialog({
               className="w-full rounded-md border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring" />
           </Field>
           <Field label="Assign to">
-            <select required value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}
-              className="w-full rounded-md border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring">
-              {assignable.length === 0 && <option value="">No employees / staff yet</option>}
-              {assignable.map((m) => (
-                <option key={m.id} value={m.id}>{m.full_name || m.email} · {m.role}</option>
-              ))}
-            </select>
+            <div className="relative mb-2">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, skill, department…"
+                className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="max-h-56 space-y-1 overflow-y-auto rounded-md border p-1">
+              {filtered.length === 0 && (
+                <p className="p-3 text-sm text-muted-foreground">No matching employees or staff.</p>
+              )}
+              {filtered.map((m) => {
+                const selected = assignedTo === m.id;
+                return (
+                  <button
+                    type="button"
+                    key={m.id}
+                    onClick={() => setAssignedTo(m.id)}
+                    className={`w-full rounded-md p-2 text-left transition ${selected ? "bg-accent/15 ring-1 ring-accent" : "hover:bg-muted"}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium">{m.full_name || m.email}</span>
+                      <span className="text-[11px] capitalize text-muted-foreground">{m.role}</span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {[m.designation, m.department].filter(Boolean).join(" · ") || "No designation set"}
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-1">
+                      {(skillsBy[m.id] ?? []).slice(0, 4).map((s) => (
+                        <span key={s} className="rounded-full bg-muted px-2 py-0.5 text-[10px]">{s}</span>
+                      ))}
+                      <span className="ml-auto text-[10px] text-muted-foreground">
+                        {openTasks[m.id] ?? 0} open
+                        {overdue[m.id] ? ` · ${overdue[m.id]} overdue` : ""}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Priority">
               <select value={priority} onChange={(e) => setPriority(e.target.value as TaskPriority)}
