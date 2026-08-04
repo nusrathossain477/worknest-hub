@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      company_settings: {
+        Row: {
+          address: string
+          company_name: string
+          helpline: string
+          id: string
+          phone: string
+          support_email: string
+          updated_at: string
+          website: string
+        }
+        Insert: {
+          address?: string
+          company_name?: string
+          helpline?: string
+          id?: string
+          phone?: string
+          support_email?: string
+          updated_at?: string
+          website?: string
+        }
+        Update: {
+          address?: string
+          company_name?: string
+          helpline?: string
+          id?: string
+          phone?: string
+          support_email?: string
+          updated_at?: string
+          website?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -79,24 +112,89 @@ export type Database = {
           },
         ]
       }
-      profiles: {
+      profile_skills: {
         Row: {
           created_at: string
-          email: string
-          full_name: string
           id: string
+          proficiency: number
+          skill_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          email?: string
-          full_name?: string
-          id: string
+          id?: string
+          proficiency?: number
+          skill_id: string
+          user_id: string
         }
         Update: {
           created_at?: string
+          id?: string
+          proficiency?: number
+          skill_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string
+          created_at: string
+          department: string
+          designation: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          department?: string
+          designation?: string
+          email?: string
+          full_name?: string
+          id: string
+          phone?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string
+          created_at?: string
+          department?: string
+          designation?: string
           email?: string
           full_name?: string
           id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -225,7 +323,9 @@ export type Database = {
           description: string
           due_date: string
           id: string
+          overdue_notified: boolean
           priority: Database["public"]["Enums"]["task_priority"]
+          reminder_24h_sent: boolean
           status: Database["public"]["Enums"]["task_status"]
           submitted_at: string | null
           target_role: Database["public"]["Enums"]["app_role"]
@@ -239,7 +339,9 @@ export type Database = {
           description?: string
           due_date: string
           id?: string
+          overdue_notified?: boolean
           priority?: Database["public"]["Enums"]["task_priority"]
+          reminder_24h_sent?: boolean
           status?: Database["public"]["Enums"]["task_status"]
           submitted_at?: string | null
           target_role: Database["public"]["Enums"]["app_role"]
@@ -253,7 +355,9 @@ export type Database = {
           description?: string
           due_date?: string
           id?: string
+          overdue_notified?: boolean
           priority?: Database["public"]["Enums"]["task_priority"]
+          reminder_24h_sent?: boolean
           status?: Database["public"]["Enums"]["task_status"]
           submitted_at?: string | null
           target_role?: Database["public"]["Enums"]["app_role"]
