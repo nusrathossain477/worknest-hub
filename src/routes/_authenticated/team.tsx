@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCompanySettings } from "@/hooks/use-company";
@@ -78,8 +78,8 @@ function TeamPage() {
           </thead>
           <tbody>
             {members.map((m) => (
-              <>
-                <tr key={m.id} className="border-t">
+              <Fragment key={m.id}>
+                <tr className="border-t">
                   <td className="px-2 py-2">
                     <button
                       onClick={() => setOpen(open === m.id ? null : m.id)}
@@ -103,7 +103,7 @@ function TeamPage() {
                   </td>
                 </tr>
                 {open === m.id && (
-                  <tr key={`${m.id}-details`} className="border-t bg-muted/20">
+                  <tr className="border-t bg-muted/20">
                     <td colSpan={6} className="space-y-3 px-6 py-4">
                       <div className="grid gap-2 text-sm sm:grid-cols-3">
                         <div><span className="text-muted-foreground">Phone: </span>{m.phone || "—"}</div>
@@ -117,7 +117,7 @@ function TeamPage() {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
