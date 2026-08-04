@@ -8,6 +8,40 @@ export interface Profile {
   full_name: string;
   email: string;
   created_at: string;
+  designation: string;
+  department: string;
+  phone: string;
+  bio: string;
+  avatar_url: string | null;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface ProfileSkill {
+  id: string;
+  user_id: string;
+  skill_id: string;
+  proficiency: number;
+  created_at: string;
+}
+
+export interface ProfileSkillWithName extends ProfileSkill {
+  skill: { id: string; name: string } | null;
+}
+
+export interface CompanySettings {
+  id: string;
+  company_name: string;
+  address: string;
+  phone: string;
+  helpline: string;
+  support_email: string;
+  website: string;
+  updated_at: string;
 }
 
 export interface Task {
