@@ -28,8 +28,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full bg-background">
       <aside className="hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
-        <div className="flex items-center gap-2 px-6 py-5">
-          <img src={logo.url} alt="WorkNest logo" className="h-10 w-auto max-w-[48px] shrink-0 object-contain" />
+        <div className="flex min-h-20 items-center gap-3 px-5 py-3">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-sidebar-foreground/10 p-1">
+            <img src={logo.url} alt="WorkNest logo" className="h-full w-full object-contain" />
+          </div>
           <div>
             <div className="font-semibold leading-tight">WorkNest</div>
             <div className="text-xs capitalize text-sidebar-foreground/60">{role}</div>
