@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { AppRole, Profile, TaskPriority } from "@/lib/types";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { toast } from "sonner";
+
 
 interface MemberRow extends Profile { role: AppRole }
 
