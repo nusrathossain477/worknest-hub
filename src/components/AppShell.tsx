@@ -1,12 +1,14 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ListChecks, Users, Clock, LogOut, Bell } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, Clock, LogOut, UserCircle, MapPin, Phone, Mail } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useCompanySettings } from "@/hooks/use-company";
 import { NotificationsBell } from "./NotificationsBell";
 import logo from "@/assets/worknest-logo.png.asset.json";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, role, signOut } = useAuth();
+  const { settings } = useCompanySettings();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
@@ -14,8 +16,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/tasks", label: "Tasks", icon: ListChecks },
     { to: "/attendance", label: "Attendance", icon: Clock },
+    { to: "/profile", label: "Profile", icon: UserCircle },
     ...(role === "admin" ? [{ to: "/team", label: "Team", icon: Users }] : []),
   ];
+
 
   const onSignOut = async () => {
     await signOut();
