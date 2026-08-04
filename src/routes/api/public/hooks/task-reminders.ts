@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/public/hooks/task-reminders")({
 
         const now = new Date();
         const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        const openStatuses = ["pending", "in_progress", "late"];
+        const openStatuses = ["pending", "in_progress", "late"] as const;
 
         // 1) Due within the next 24 hours, not yet reminded
         const { data: soon, error: soonErr } = await supabaseAdmin
