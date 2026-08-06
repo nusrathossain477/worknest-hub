@@ -41,8 +41,11 @@ function TaskDetail() {
     (u ?? []).forEach((row: any) => ids.add(row.user_id));
     (f ?? []).forEach((row: any) => ids.add(row.admin_id));
     if (ids.size) {
-      const { data: profs } = await supabase.from("profiles").select("*").in("id", Array.from(ids));
-      setProfilesMap(new Map((profs ?? []).map((p: any) => [p.id, p])));
+      // limited directory: names only, no private contact details
+      const { data: profs } = await (supabase as any).rpc("directory_profiles");
+      setProfilesMap(
+        new Map(((profs ?? []) as any[]).filter((p) => ids.has(p.id)).map((p) => [p.id, p])),
+      );
     }
   };
 
