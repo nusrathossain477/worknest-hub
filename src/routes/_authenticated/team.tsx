@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/team")({
 interface MemberRow extends Profile { role: AppRole; role_id?: string }
 
 function TeamPage() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [open, setOpen] = useState<string | null>(null);
 
@@ -94,7 +94,9 @@ function TeamPage() {
                   <td className="hidden px-4 py-2 text-muted-foreground lg:table-cell">{m.department || "—"}</td>
                   <td className="hidden px-4 py-2 text-muted-foreground lg:table-cell">{m.email}</td>
                   <td className="px-4 py-2">
-                    <select value={m.role} onChange={(e) => changeRole(m, e.target.value as AppRole)}
+                    <select value={m.role} disabled={m.id === user?.id}
+                      title={m.id === user?.id ? "You cannot change your own role" : undefined}
+                      onChange={(e) => changeRole(m, e.target.value as AppRole)}
                       className="rounded-md border bg-background px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-ring">
                       <option value="admin">Admin</option>
                       <option value="employee">Employee</option>
