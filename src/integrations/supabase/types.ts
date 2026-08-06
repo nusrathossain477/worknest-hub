@@ -389,7 +389,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      directory_profiles: {
+        Row: {
+          avatar_url: string | null
+          department: string | null
+          designation: string | null
+          full_name: string | null
+          id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          department?: string | null
+          designation?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          department?: string | null
+          designation?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_role: {
