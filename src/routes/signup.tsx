@@ -2,17 +2,25 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { AppRole } from "@/lib/types";
 import logo from "@/assets/worknest-logo.png.asset.json";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
+const ROLES: { value: AppRole; label: string; desc: string }[] = [
+  { value: "admin", label: "Admin", desc: "Bosses who assign work and review progress." },
+  { value: "employee", label: "Employee", desc: "Tech / project workers." },
+  { value: "staff", label: "Staff", desc: "Clerks and general workers." },
+];
+
 function SignupPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<AppRole>("employee");
   const [busy, setBusy] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
@@ -23,7 +31,7 @@ function SignupPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: fullName },
+        data: { full_name: fullName, role },
       },
     });
     setBusy(false);
@@ -59,10 +67,21 @@ function SignupPage() {
             <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <p className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-            New accounts start with <span className="font-medium text-foreground">Staff</span> access. An
-            admin will assign your correct role after you sign in — roles cannot be chosen by yourself.
-          </p>
+          <div>
+            <label className="mb-2 block text-sm font-medium">I am a…</label>
+            <div className="grid gap-2">
+              {ROLES.map((r) => (
+                <label key={r.value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition ${role === r.value ? "border-accent bg-accent/10" : "hover:bg-muted"}`}>
+                  <input type="radio" name="role" className="mt-1" checked={role === r.value} onChange={() => setRole(r.value)} />
+                  <div>
+                    <div className="font-medium">{r.label}</div>
+                    <div className="text-xs text-muted-foreground">{r.desc}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
           <button type="submit" disabled={busy}
             className="w-full rounded-md bg-primary py-2.5 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
             {busy ? "Creating…" : "Create account"}
