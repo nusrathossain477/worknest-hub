@@ -389,32 +389,19 @@ export type Database = {
       }
     }
     Views: {
-      directory_profiles: {
-        Row: {
-          avatar_url: string | null
-          department: string | null
-          designation: string | null
-          full_name: string | null
-          id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          department?: string | null
-          designation?: string | null
-          full_name?: string | null
-          id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          department?: string | null
-          designation?: string | null
-          full_name?: string | null
-          id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      directory_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          department: string
+          designation: string
+          full_name: string
+          id: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
