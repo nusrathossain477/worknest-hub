@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import type { Task, Profile, AppRole } from "@/lib/types";
+import type { Task } from "@/lib/types";
+import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { Plus, Users, ListChecks, CheckCircle2, AlertTriangle } from "lucide-react";
 import { AssignTaskDialog } from "./AssignTaskDialog";
 import { TaskCard } from "./TaskCard";
+import { RoleBadge } from "./RoleBadge";
 import { Link } from "@tanstack/react-router";
-
-interface MemberRow extends Profile { role: AppRole }
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -16,14 +16,12 @@ export function AdminDashboard() {
   const [open, setOpen] = useState(false);
 
   const load = async () => {
-    const [{ data: t }, { data: profs }, { data: roles }] = await Promise.all([
+    const [{ data: t }, people] = await Promise.all([
       supabase.from("tasks").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("*"),
-      supabase.from("user_roles").select("user_id, role"),
+      fetchVisibleMembers(),
     ]);
     setTasks((t as Task[]) ?? []);
-    const roleMap = new Map((roles ?? []).map((r: any) => [r.user_id, r.role]));
-    setMembers(((profs as Profile[]) ?? []).map((p) => ({ ...p, role: (roleMap.get(p.id) as AppRole) ?? "staff" })));
+    setMembers(people);
   };
 
   useEffect(() => { load(); }, [user?.id]);
@@ -122,14 +120,7 @@ function Stat({ icon: Icon, label, value, tone }: { icon: any; label: string; va
   );
 }
 
-function RoleBadge({ role }: { role: AppRole }) {
-  const map: Record<AppRole, string> = {
-    admin: "bg-primary/10 text-primary",
-    employee: "bg-accent/15 text-accent-foreground",
-    staff: "bg-muted text-foreground",
-  };
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${map[role]}`}>{role}</span>;
-}
+
 
 function EmptyState({ message }: { message: string }) {
   return <div className="rounded-lg border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">{message}</div>;

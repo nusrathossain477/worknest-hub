@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ListChecks, Users, Clock, LogOut, UserCircle, MapPin, Phone, Mail } from "lucide-react";
+import { LayoutDashboard, ListChecks, Users, Clock, LogOut, UserCircle, MapPin, Phone, Mail, UserCog } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCompanySettings } from "@/hooks/use-company";
@@ -14,10 +14,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/tasks", label: "Tasks", icon: ListChecks },
+    ...(role === "hr" ? [] : [{ to: "/tasks", label: "Tasks", icon: ListChecks }]),
     { to: "/attendance", label: "Attendance", icon: Clock },
     { to: "/profile", label: "Profile", icon: UserCircle },
-    ...(role === "admin" ? [{ to: "/team", label: "Team", icon: Users }] : []),
+    ...(role === "admin" || role === "hr" ? [{ to: "/team", label: "Team", icon: Users }] : []),
+    ...(role === "hr" || role === "admin" ? [{ to: "/people", label: "Accounts", icon: UserCog }] : []),
   ];
 
 
