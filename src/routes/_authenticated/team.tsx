@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCompanySettings } from "@/hooks/use-company";
 import { SkillsEditor } from "@/components/SkillsEditor";
-import type { AppRole, Profile } from "@/lib/types";
+import { RoleBadge } from "@/components/RoleBadge";
+import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -22,46 +23,24 @@ export const Route = createFileRoute("/_authenticated/team")({
   }),
 });
 
-interface MemberRow extends Profile { role: AppRole; role_id?: string }
-
 function TeamPage() {
   const { role } = useAuth();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [open, setOpen] = useState<string | null>(null);
 
-  const load = async () => {
-    const [{ data: profs }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("user_roles").select("id, user_id, role"),
-    ]);
-    const map = new Map((roles ?? []).map((r: any) => [r.user_id, r]));
-    setMembers(((profs as Profile[]) ?? []).map((p) => {
-      const r = map.get(p.id) as any;
-      return { ...p, role: (r?.role as AppRole) ?? "staff", role_id: r?.id };
-    }));
-  };
-
+  const load = async () => setMembers(await fetchVisibleMembers());
   useEffect(() => { load(); }, []);
 
-  if (role !== "admin") return <Navigate to="/dashboard" />;
-
-  const changeRole = async (m: MemberRow, newRole: AppRole) => {
-    if (m.role_id) {
-      const { error } = await supabase.from("user_roles").update({ role: newRole }).eq("id", m.role_id);
-      if (error) { toast.error(error.message); return; }
-    } else {
-      const { error } = await supabase.from("user_roles").insert({ user_id: m.id, role: newRole });
-      if (error) { toast.error(error.message); return; }
-    }
-    toast.success("Role updated");
-    load();
-  };
+  if (role !== "admin" && role !== "hr") return <Navigate to="/dashboard" />;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Team</h1>
-        <p className="text-sm text-muted-foreground">Profiles, skills and roles for everyone in your company.</p>
+        <p className="text-sm text-muted-foreground">
+          Profiles, skills and roles. Roles come from each person&apos;s WorkNest work email and can only be
+          changed by HR issuing a new account.
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">
@@ -72,7 +51,7 @@ function TeamPage() {
               <th className="px-4 py-2 font-medium">Name</th>
               <th className="hidden px-4 py-2 font-medium md:table-cell">Designation</th>
               <th className="hidden px-4 py-2 font-medium lg:table-cell">Department</th>
-              <th className="hidden px-4 py-2 font-medium lg:table-cell">Email</th>
+              <th className="hidden px-4 py-2 font-medium lg:table-cell">Work email</th>
               <th className="px-4 py-2 font-medium">Role</th>
             </tr>
           </thead>
@@ -92,15 +71,8 @@ function TeamPage() {
                   <td className="px-4 py-2">{m.full_name || "—"}</td>
                   <td className="hidden px-4 py-2 text-muted-foreground md:table-cell">{m.designation || "—"}</td>
                   <td className="hidden px-4 py-2 text-muted-foreground lg:table-cell">{m.department || "—"}</td>
-                  <td className="hidden px-4 py-2 text-muted-foreground lg:table-cell">{m.email}</td>
-                  <td className="px-4 py-2">
-                    <select value={m.role} onChange={(e) => changeRole(m, e.target.value as AppRole)}
-                      className="rounded-md border bg-background px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-ring">
-                      <option value="admin">Admin</option>
-                      <option value="employee">Employee</option>
-                      <option value="staff">Staff</option>
-                    </select>
-                  </td>
+                  <td className="hidden px-4 py-2 text-muted-foreground lg:table-cell">{m.email || "—"}</td>
+                  <td className="px-4 py-2"><RoleBadge role={m.role} /></td>
                 </tr>
                 {open === m.id && (
                   <tr className="border-t bg-muted/20">
@@ -123,7 +95,7 @@ function TeamPage() {
         </table>
       </div>
 
-      <CompanySettingsCard />
+      {role === "admin" && <CompanySettingsCard />}
     </div>
   );
 }

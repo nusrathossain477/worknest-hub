@@ -326,6 +326,7 @@ export type Database = {
           overdue_notified: boolean
           priority: Database["public"]["Enums"]["task_priority"]
           reminder_24h_sent: boolean
+          required_skill_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           submitted_at: string | null
           target_role: Database["public"]["Enums"]["app_role"]
@@ -342,6 +343,7 @@ export type Database = {
           overdue_notified?: boolean
           priority?: Database["public"]["Enums"]["task_priority"]
           reminder_24h_sent?: boolean
+          required_skill_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           submitted_at?: string | null
           target_role: Database["public"]["Enums"]["app_role"]
@@ -358,13 +360,22 @@ export type Database = {
           overdue_notified?: boolean
           priority?: Database["public"]["Enums"]["task_priority"]
           reminder_24h_sent?: boolean
+          required_skill_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           submitted_at?: string | null
           target_role?: Database["public"]["Enums"]["app_role"]
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_required_skill_id_fkey"
+            columns: ["required_skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -392,16 +403,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      directory_profiles: {
-        Args: never
-        Returns: {
-          avatar_url: string
-          department: string
-          designation: string
-          full_name: string
-          id: string
-        }[]
-      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -413,9 +414,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      role_from_email: {
+        Args: { _email: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      visible_members: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          department: string
+          designation: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
     }
     Enums: {
-      app_role: "admin" | "employee" | "staff"
+      app_role: "admin" | "employee" | "staff" | "hr"
       attachment_kind: "file" | "link"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status:
@@ -552,7 +572,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "employee", "staff"],
+      app_role: ["admin", "employee", "staff", "hr"],
       attachment_kind: ["file", "link"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["pending", "in_progress", "submitted", "completed", "late"],

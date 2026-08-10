@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import type { Task, Profile, AppRole } from "@/lib/types";
+import type { Task } from "@/lib/types";
+import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { TaskCard } from "@/components/TaskCard";
 import { AssignTaskDialog } from "@/components/AssignTaskDialog";
 import { Plus } from "lucide-react";
@@ -11,8 +12,6 @@ export const Route = createFileRoute("/_authenticated/tasks/")({
   component: TasksPage,
 });
 
-interface MemberRow extends Profile { role: AppRole }
-
 function TasksPage() {
   const { user, role } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,21 +19,18 @@ function TasksPage() {
   const [filter, setFilter] = useState<"all" | "active" | "submitted" | "completed">("active");
   const [open, setOpen] = useState(false);
 
+  const isAdmin = role === "admin";
+  const isEmployee = role === "employee";
+  const canAssign = isAdmin || isEmployee;
+
   const load = async () => {
     if (!user) return;
     let q = supabase.from("tasks").select("*").order("due_date", { ascending: true });
-    if (role !== "admin") q = q.eq("assigned_to", user.id);
+    if (!isAdmin) q = q.or(`assigned_to.eq.${user.id},assigned_by.eq.${user.id}`);
     const { data } = await q;
     setTasks((data as Task[]) ?? []);
 
-    if (role === "admin") {
-      const [{ data: profs }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("*"),
-        supabase.from("user_roles").select("user_id, role"),
-      ]);
-      const map = new Map((roles ?? []).map((r: any) => [r.user_id, r.role]));
-      setMembers(((profs as Profile[]) ?? []).map((p) => ({ ...p, role: (map.get(p.id) as AppRole) ?? "staff" })));
-    }
+    if (canAssign) setMembers(await fetchVisibleMembers());
   };
 
   useEffect(() => { load(); }, [user?.id, role]);
@@ -53,12 +49,18 @@ function TasksPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Tasks</h1>
-          <p className="text-sm text-muted-foreground">{role === "admin" ? "All tasks across the company" : "Your assigned work"}</p>
+          <p className="text-sm text-muted-foreground">
+            {isAdmin
+              ? "All tasks across the company"
+              : isEmployee
+                ? "Your work plus the tasks you delegated to staff"
+                : "Your assigned work"}
+          </p>
         </div>
-        {role === "admin" && (
+        {canAssign && (
           <button onClick={() => setOpen(true)}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4" /> Assign task
+            <Plus className="h-4 w-4" /> {isEmployee ? "Delegate to staff" : "Assign task"}
           </button>
         )}
       </div>
@@ -78,12 +80,19 @@ function TasksPage() {
         </div>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
-          {filtered.map((t) => <TaskCard key={t.id} task={t} assigneeName={memberById.get(t.assigned_to)?.full_name} />)}
+          {filtered.map((t) => (
+            <TaskCard key={t.id} task={t} assigneeName={memberById.get(t.assigned_to)?.full_name} />
+          ))}
         </div>
       )}
 
-      {open && role === "admin" && (
-        <AssignTaskDialog members={members} onClose={() => setOpen(false)} onCreated={load} />
+      {open && canAssign && (
+        <AssignTaskDialog
+          members={members}
+          mode={isEmployee ? "employee" : "admin"}
+          onClose={() => setOpen(false)}
+          onCreated={load}
+        />
       )}
     </div>
   );
