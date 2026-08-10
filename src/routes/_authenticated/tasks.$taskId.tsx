@@ -20,6 +20,7 @@ function TaskDetail() {
   const [updates, setUpdates] = useState<TaskUpdate[]>([]);
   const [feedback, setFeedback] = useState<TaskFeedback[]>([]);
   const [profilesMap, setProfilesMap] = useState<Map<string, Profile>>(new Map());
+  const [requiredSkill, setRequiredSkill] = useState<string>("");
 
   const [message, setMessage] = useState("");
   const [updateType, setUpdateType] = useState<UpdateType>("progress");
@@ -35,6 +36,15 @@ function TaskDetail() {
     setTask((t as Task) ?? null);
     setUpdates((u as TaskUpdate[]) ?? []);
     setFeedback((f as TaskFeedback[]) ?? []);
+
+    const skillId = (t as Task | null)?.required_skill_id;
+    if (skillId) {
+      const { data: s } = await supabase.from("skills").select("name").eq("id", skillId).maybeSingle();
+      setRequiredSkill(s?.name ?? "");
+    } else {
+      setRequiredSkill("");
+    }
+
 
     const ids = new Set<string>();
     if (t) { ids.add((t as Task).assigned_to); ids.add((t as Task).assigned_by); }
