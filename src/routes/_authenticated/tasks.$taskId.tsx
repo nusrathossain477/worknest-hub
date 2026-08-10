@@ -140,7 +140,9 @@ function TaskDetail() {
           <Info label="Priority" value={task.priority} />
           <Info label="Due" value={`${format(due, "MMM d, p")} (${formatDistanceToNow(due, { addSuffix: true })})`} />
           <Info label="Submitted" value={task.submitted_at ? format(new Date(task.submitted_at), "MMM d, p") : "—"} />
+          <Info label="Required skill" value={requiredSkill || (task.required_skill_id ? "—" : "Not required")} />
         </dl>
+
 
         {/* Status actions for assignee */}
         {isAssignee && task.status !== "completed" && (
