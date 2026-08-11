@@ -62,7 +62,6 @@ function SignupPage() {
           <div>
             <label className="mb-1 block text-sm font-medium">Work email</label>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@worknest.bd"
               className="w-full rounded-md border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
