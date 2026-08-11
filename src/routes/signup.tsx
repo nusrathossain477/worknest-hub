@@ -2,20 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ROLE_DOMAIN, roleFromEmail, type AppRole } from "@/lib/types";
+import { roleFromEmail } from "@/lib/types";
 import logo from "@/assets/worknest-logo.png.asset.json";
-import { ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
-
-const ROLE_HINTS: { value: AppRole; label: string }[] = [
-  { value: "admin", label: "Admin" },
-  { value: "employee", label: "Employee" },
-  { value: "staff", label: "Staff" },
-  { value: "hr", label: "HR" },
-];
 
 function SignupPage() {
   const navigate = useNavigate();
