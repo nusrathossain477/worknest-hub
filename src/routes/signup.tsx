@@ -2,20 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ROLE_DOMAIN, roleFromEmail, type AppRole } from "@/lib/types";
+import { roleFromEmail } from "@/lib/types";
 import logo from "@/assets/worknest-logo.png.asset.json";
-import { ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
-
-const ROLE_HINTS: { value: AppRole; label: string }[] = [
-  { value: "admin", label: "Admin" },
-  { value: "employee", label: "Employee" },
-  { value: "staff", label: "Staff" },
-  { value: "hr", label: "HR" },
-];
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -57,21 +49,8 @@ function SignupPage() {
           </Link>
           <h1 className="mt-4 text-2xl font-bold">Activate your work account</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your role is set by HR through your work email — it can never be chosen here.
+            Enter the work email issued to you by HR.
           </p>
-        </div>
-
-        <div className="mb-5 rounded-md border bg-muted/40 p-3 text-xs">
-          <div className="mb-1 flex items-center gap-1.5 font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5" /> Accepted work emails
-          </div>
-          <ul className="space-y-0.5 text-muted-foreground">
-            {ROLE_HINTS.map((r) => (
-              <li key={r.value}>
-                <span className="text-foreground">{r.label}:</span> name@{ROLE_DOMAIN[r.value]}
-              </li>
-            ))}
-          </ul>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
@@ -83,15 +62,8 @@ function SignupPage() {
           <div>
             <label className="mb-1 block text-sm font-medium">Work email</label>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder={`name@${ROLE_DOMAIN.employee}`}
+              placeholder="you@worknest.bd"
               className="w-full rounded-md border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring" />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {email
-                ? detected
-                  ? `Verified — this email signs in as ${detected.toUpperCase()}.`
-                  : "Not a WorkNest work email. Ask HR for your account."
-                : "Issued by HR."}
-            </p>
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Password</label>
