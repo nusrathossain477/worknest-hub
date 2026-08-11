@@ -49,21 +49,8 @@ function SignupPage() {
           </Link>
           <h1 className="mt-4 text-2xl font-bold">Activate your work account</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your role is set by HR through your work email — it can never be chosen here.
+            Enter the work email issued to you by HR.
           </p>
-        </div>
-
-        <div className="mb-5 rounded-md border bg-muted/40 p-3 text-xs">
-          <div className="mb-1 flex items-center gap-1.5 font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5" /> Accepted work emails
-          </div>
-          <ul className="space-y-0.5 text-muted-foreground">
-            {ROLE_HINTS.map((r) => (
-              <li key={r.value}>
-                <span className="text-foreground">{r.label}:</span> name@{ROLE_DOMAIN[r.value]}
-              </li>
-            ))}
-          </ul>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
