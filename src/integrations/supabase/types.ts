@@ -414,10 +414,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      role_from_email: {
-        Args: { _email: string }
-        Returns: Database["public"]["Enums"]["app_role"]
-      }
       visible_members: {
         Args: never
         Returns: {

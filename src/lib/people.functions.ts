@@ -1,23 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const ROLE_DOMAINS: Record<string, string> = {
-  hr: "hr.worknest.bd",
-  admin: "admin.worknest.bd",
-  employee: "employee.worknest.bd",
-  staff: "staff.worknest.bd",
-};
+import type { AppRole } from "@/lib/types";
 
 const provisionSchema = z.object({
   fullName: z.string().trim().min(2).max(100),
-  username: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .min(2)
-    .max(40)
-    .regex(/^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/, "Use letters, numbers, dot, dash or underscore"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
   role: z.enum(["hr", "admin", "employee", "staff"]),
   password: z.string().min(8).max(72),
   designation: z.string().trim().max(80).optional().default(""),
@@ -43,16 +31,20 @@ export const provisionAccount = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanProvision(context.supabase, context.userId);
 
-    const email = `${data.username}@${ROLE_DOMAINS[data.role]}`;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email,
+      email: data.email,
       password: data.password,
       email_confirm: true,
       user_metadata: { full_name: data.fullName },
     });
     if (error || !created.user) throw new Error(error?.message ?? "Could not create the account");
+
+    const { error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: created.user.id, role: data.role as AppRole });
+    if (roleError) throw new Error(roleError.message);
 
     if (data.designation || data.department) {
       await supabaseAdmin
@@ -61,7 +53,8 @@ export const provisionAccount = createServerFn({ method: "POST" })
         .eq("id", created.user.id);
     }
 
-    return { id: created.user.id, email, role: data.role };
+    // A welcome email is enqueued here once email infrastructure is set up.
+    return { id: created.user.id, email: data.email, role: data.role };
   });
 
 export const resetAccountPassword = createServerFn({ method: "POST" })

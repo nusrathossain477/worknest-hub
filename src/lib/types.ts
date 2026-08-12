@@ -1,17 +1,12 @@
 export type AppRole = "hr" | "admin" | "employee" | "staff";
 
-export const ROLE_DOMAIN: Record<AppRole, string> = {
-  hr: "hr.worknest.bd",
-  admin: "admin.worknest.bd",
-  employee: "employee.worknest.bd",
-  staff: "staff.worknest.bd",
+export const ROLE_LABELS: Record<AppRole, string> = {
+  hr: "HR",
+  admin: "Admin",
+  employee: "Employee",
+  staff: "Staff",
 };
 
-export function roleFromEmail(email: string): AppRole | null {
-  const domain = email.split("@")[1]?.toLowerCase() ?? "";
-  const found = (Object.keys(ROLE_DOMAIN) as AppRole[]).find((r) => ROLE_DOMAIN[r] === domain);
-  return found ?? null;
-}
 export type TaskStatus = "pending" | "in_progress" | "submitted" | "completed" | "late";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 export type UpdateType = "progress" | "request";
