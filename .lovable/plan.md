@@ -1,70 +1,69 @@
-# Real email addresses + welcome email
+# Real emails + HR-assigned roles + welcome email
 
-Keep the switch to **real email addresses** (a person's own email like `runa.employee@gmail.com`, role read from the suffix before the `@`), and add a **welcome email** so each user is told their login email, role, and how to sign in. Sending any email requires a verified sending domain, which isn't set up yet.
+Drop email-based role derivation entirely. A user's email is just their real address (any domain — Gmail, Outlook, company mail). **Role is a separate field HR chooses** when provisioning the account. Only HR can create accounts, so nobody can self-select a role. A **welcome email** tells each new user their login email, role, and a link to set their password.
 
-## Prerequisite — email domain (blocking)
+## Prerequisite — email domain (blocking for the welcome email)
 
 No sender domain is configured. Before any welcome email can go out:
 
 1. You set up a real domain you own via the email setup dialog (`presentation-open-email-setup`). There is no free/shared sender domain.
-2. After the domain is configured (DNS may still be verifying), I run the email infrastructure setup, then scaffold the auth email templates and the app (transactional) email templates.
-3. Email sending activates once DNS verifies; you can monitor it in Cloud → Emails.
+2. After the domain is configured (DNS may still be verifying), I run email infrastructure setup, then scaffold the auth email templates and the app (transactional) email templates.
+3. Sending activates once DNS verifies; monitor in Cloud → Emails.
 
-If you don't own a domain, the welcome-email part can't happen — you'd buy one first (Project Settings → Domains → Buy new domain, or any registrar). The real-email role rule still works without email.
+If you don't own a domain, the welcome-email part can't happen — buy one first (Project Settings → Domains → Buy new domain, or any registrar). The role/HR-provisioning part works without email.
 
-## New role rule
+## The model
 
-The local part must end with a separator plus the role name:
-
-```text
-runa.employee@gmail.com   -> employee
-runa_admin@outlook.com    -> admin
-karim-staff@gmail.com     -> staff
-nusrat.hr@gmail.com       -> hr
-```
-
-Accepted separators: `.` `_` `-`. Domain can be anything valid. No matching suffix means no role and signup is rejected.
+- **Email**: the person's real address (e.g. `runa@gmail.com`). No role suffix, no special domain.
+- **Role**: chosen by HR from a dropdown when creating the account (admin / employee / staff / hr). Stored in `user_roles` as today.
+- **Self-signup disabled.** Only HR provisions accounts. This removes the "anyone picks any role" problem at the root.
+- **Bootstrap**: the very first account (when zero roles exist) auto-becomes HR, so the system can start. After that, only HR can create accounts.
 
 ## What changes
 
-### 1. Database — role detection from suffix
-- Rewrite `public.role_from_email(text)`: lowercase `split_part(email,'@',1)`, match `~ '[._-](hr|admin|employee|staff)$'`, return that enum; else NULL.
-- `handle_new_user` and `guard_user_roles` call it unchanged (they already do).
-- Old `*.worknest.bd` accounts stop being valid; those test accounts get cleaned out so HR can re-issue with real addresses.
+### 1. Database — remove email-based role logic
+- Rewrite `handle_new_user()`: create the `profiles` row; if `user_roles` is empty, insert role `hr` (bootstrap); otherwise assign **no** role (HR assigns it via `provisionAccount`).
+- Rewrite `guard_user_roles()`: keep the "cannot change your own role" and "always at least one HR" invariants; **remove** the email-match / work-email check.
+- Drop `role_from_email(text)` — no longer used. `has_role`, `get_user_role`, `visible_members` stay unchanged.
+- Clean out the old `*.worknest.bd` test accounts so HR re-issues real ones.
 
-### 2. Email setup + welcome email (after domain is configured)
-- Infrastructure: `setup_email_infra` (queues, `enqueue_email` RPC, cron).
-- Auth templates: `scaffold_auth_email_templates` so verification/password-reset mail is branded.
-- App email: `scaffold_transactional_email`, then a new **welcome** React Email template in `src/lib/email-templates/welcome.tsx` containing: the person's name, their login email, their detected role, a "Sign in to WorkNest" button to `/login`, and a note that HR issued the account.
-- Trigger: in `provisionAccount` (HR path), after `createUser`, enqueue the welcome email server-side via `supabaseAdmin.rpc('enqueue_email', …)` into the transactional queue — no browser JWT needed. Idempotency key `welcome-<userId>`.
-- Self-signup path: the auth confirmation email already delivers the verification link; after confirmation, the same welcome email is enqueued from the `handle_new_user` flow (or a post-confirm hook) so self-activating users also get their role info. HR-created accounts skip verification (pre-confirmed) but still get the welcome email.
+### 2. HR "Work accounts" page (`src/routes/_authenticated/people.tsx`)
+- HR types the person's **full real email** (e.g. `runa@gmail.com`) and picks the **role** from a dropdown — role no longer comes from the email.
+- Standard email format validation only; no suffix/domain rule.
+- On success: "Account created — welcome email sent".
+- Reference block updates: it now just lists the four roles and their meaning, not a naming pattern.
 
-### 3. Auth config
-- `auto_confirm_email: false` — self-signups must click the confirmation link before signing in.
-- HR-created accounts stay pre-confirmed (`email_confirm: true` on `createUser`) — HR hands over the password, no extra click.
-- `emailRedirectTo` stays `${origin}/dashboard`.
+### 3. Server fn (`src/lib/people.functions.ts`)
+- `provisionAccount` takes `email` (full real email) + explicit `role` + password (instead of `username`).
+- Server-side validates email format and that `role` is one of the four.
+- Creates the user with `email_confirm: true` (HR hands over access; no extra verification click).
+- Inserts the `user_roles` row with the chosen role (the guard trigger allows it).
+- Generates a password-set link via `admin.generateLink({ type: 'recovery', email })` and enqueues the **welcome email** (see below).
 
-### 4. HR "Work accounts" page (`src/routes/_authenticated/people.tsx`)
-- HR types the person's **full real email** (e.g. `runa.employee@gmail.com`) instead of a username + fixed domain.
-- Page shows live which role that email maps to and blocks Create when the email doesn't match the rule.
-- On success, toast says "Account created — welcome email sent".
-- Reference block updates to show the new naming pattern per role.
+### 4. Welcome email (after the domain is configured)
+- New React Email template `src/lib/email-templates/welcome.tsx`: greeting, the person's name, their **login email**, their **role** (plain word), a "Set your password" button (the recovery link), and a "Sign in to WorkNest" link to `/login`.
+- Sent server-side from `provisionAccount` via the `enqueue_email` RPC into the transactional queue (service role inside the handler; no browser JWT). Idempotency key `welcome-<userId>`.
+- Registered in `src/lib/email-templates/registry.ts`.
+- Auth confirmation / password-reset mail goes out through branded auth templates once scaffolded.
 
-### 5. Signup / activation page (`src/routes/signup.tsx`)
-- Same suffix validation; error text explains the naming pattern, not a domain.
-- After submit, switch to a "Check your inbox" state (confirmation pending) instead of jumping straight to `/dashboard`. Link to resend.
+### 5. Auth config
+- `disable_signup: true` — self-signup closed; only HR creates accounts.
+- `auto_confirm_email: false` for the default flow (HR-created accounts are pre-confirmed regardless).
+- `password_hibp_enabled: true` (reject breached passwords).
 
-### 6. Types + server fn
-- `src/lib/types.ts`: replace `ROLE_DOMAIN` / domain-based `roleFromEmail` with a suffix parser mirroring the SQL; add a `ROLE_SUFFIX_EXAMPLE` map for UI hints.
-- `src/lib/people.functions.ts`: `provisionAccount` takes `email` (full) instead of `username`; server-side re-validates the suffix before `createUser({ email_confirm: true })`; then enqueues the welcome email.
+### 6. Signup page (`src/routes/signup.tsx`)
+- Since self-signup is disabled, replace the self-activation form with a short message: "Accounts are issued by HR. Ask HR to create your account, then check your inbox for a welcome email." Plus a link to `/login`.
+
+### 7. Types (`src/lib/types.ts`)
+- Remove `ROLE_DOMAIN` and the domain-based `roleFromEmail`. Keep `AppRole` and the rest. `roleFromEmail` is no longer referenced by the UI (role is shown from the `user_roles` row, as it already is).
 
 ## Technical notes
-- `role_from_email` is `IMMUTABLE`; the regex is deterministic so that's fine.
-- `enqueue_email` RPC signature is created by `setup_email_infra`; exact args confirmed at implementation time. The welcome send stays server-side (service role inside the handler), never in the browser.
-- Auth confirmation mail goes out through the branded auth templates once scaffolded. If you later want a fully custom look, the templates live in `supabase/functions/_shared/email-templates/`.
-- Old fake-domain accounts: delete via a one-off migration or HR re-issues; the `guard_user_roles` "always one HR" rule still holds, so re-issue an HR account first.
+- Bootstrap safety: `handle_new_user` only auto-assigns `hr` when `user_roles` is empty, so it fires exactly once. All later accounts get their role from `provisionAccount`.
+- `guard_user_roles` still blocks self-role-change and protects the last HR, so the system can't lock itself out.
+- `enqueue_email` RPC is created by `setup_email_infra`; exact args confirmed at implementation. The welcome send stays server-side (service role inside the handler), never in the browser.
+- `admin.generateLink({ type: 'recovery', email })` returns a one-time set-password link without sending its own email, so we embed it in the welcome email.
 
 ## Out of scope
 - Marketing/newsletter/bulk email (not supported).
-- SMS/phone notifications (separate, later).
+- SMS/phone notifications.
 - Per-admin dashboards.
