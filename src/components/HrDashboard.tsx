@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { RoleBadge } from "./RoleBadge";
-import { ROLE_DOMAIN, type AppRole } from "@/lib/types";
+import { ROLE_LABELS, type AppRole } from "@/lib/types";
 import { ShieldCheck, Users, UserCog, ClipboardList } from "lucide-react";
 
 export function HrDashboard() {
