@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { provisionAccount, resetAccountPassword } from "@/lib/people.functions";
-import { ROLE_DOMAIN, type AppRole } from "@/lib/types";
+import { type AppRole } from "@/lib/types";
 import { RoleBadge } from "@/components/RoleBadge";
 import { toast } from "sonner";
 import { KeyRound, ShieldCheck, UserPlus } from "lucide-react";
@@ -59,11 +59,11 @@ function PeoplePage() {
 
       <div className="grid gap-2 rounded-lg border bg-card p-5 text-sm sm:grid-cols-2">
         <div className="sm:col-span-2 flex items-center gap-2 font-semibold">
-          <ShieldCheck className="h-4 w-4 text-success-foreground" /> Verified email format
+          <ShieldCheck className="h-4 w-4 text-success-foreground" /> How roles work
         </div>
         {ROLES.map((r) => (
           <div key={r.value} className="text-muted-foreground">
-            <span className="capitalize text-foreground">{r.label}:</span> name@{ROLE_DOMAIN[r.value]}
+            <span className="capitalize text-foreground">{r.label}:</span> {r.desc}
           </div>
         ))}
       </div>
@@ -116,7 +116,7 @@ function ProvisionCard({ onCreated, hrExists }: { onCreated: () => void; hrExist
   const create = useServerFn(provisionAccount);
   const [form, setForm] = useState({
     fullName: "",
-    username: "",
+    email: "",
     role: "employee" as AppRole,
     password: "",
     designation: "",
@@ -130,7 +130,7 @@ function ProvisionCard({ onCreated, hrExists }: { onCreated: () => void; hrExist
     try {
       const res = await create({ data: form });
       toast.success(`Account created — ${res.email}`);
-      setForm({ ...form, fullName: "", username: "", password: "", designation: "", department: "" });
+      setForm({ ...form, fullName: "", email: "", password: "", designation: "", department: "" });
       onCreated();
     } catch (err: any) {
       toast.error(err?.message ?? "Could not create the account");
@@ -172,18 +172,14 @@ function ProvisionCard({ onCreated, hrExists }: { onCreated: () => void; hrExist
           </select>
         </Field>
         <Field label="Work email">
-          <div className="flex items-center rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring">
-            <input
-              required
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="name"
-              className="w-full rounded-l-md bg-transparent px-3 py-2 text-sm outline-none"
-            />
-            <span className="whitespace-nowrap rounded-r-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-              @{ROLE_DOMAIN[form.role]}
-            </span>
-          </div>
+          <input
+            type="email"
+            required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            placeholder="runa@gmail.com"
+            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
         </Field>
         <Field label="Temporary password">
           <input
