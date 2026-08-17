@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchVisibleMembers, type MemberRow } from "@/lib/members";
 import { provisionAccount, resetAccountPassword } from "@/lib/people.functions";
-import { ROLE_DOMAIN, type AppRole } from "@/lib/types";
+import { type AppRole } from "@/lib/types";
 import { RoleBadge } from "@/components/RoleBadge";
 import { toast } from "sonner";
 import { KeyRound, ShieldCheck, UserPlus } from "lucide-react";

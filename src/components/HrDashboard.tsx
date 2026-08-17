@@ -43,15 +43,16 @@ export function HrDashboard() {
       </div>
 
       <section className="rounded-xl border bg-card p-5">
-        <h2 className="mb-2 font-semibold">How roles are verified</h2>
+        <h2 className="mb-2 font-semibold">How roles work</h2>
         <p className="mb-3 text-sm text-muted-foreground">
-          Nobody selects a role when signing in. The role is fixed by the work email you issue:
+          Nobody selects a role when signing in. You assign each person's role when you create
+          their account:
         </p>
         <ul className="grid gap-1 text-sm sm:grid-cols-2">
-          {(Object.keys(ROLE_DOMAIN) as AppRole[]).map((r) => (
+          {(Object.keys(ROLE_LABELS) as AppRole[]).map((r) => (
             <li key={r} className="flex items-center gap-2">
               <RoleBadge role={r} />
-              <span className="text-muted-foreground">name@{ROLE_DOMAIN[r]}</span>
+              <span className="text-muted-foreground">{ROLE_LABELS[r]}</span>
             </li>
           ))}
         </ul>
